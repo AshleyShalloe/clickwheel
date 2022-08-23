@@ -33,6 +33,7 @@
         align-items: center;
         justify-content: center;
         background: white;
+        cursor: pointer;
     }
     #menuContainer{
         display: block;
@@ -89,12 +90,12 @@
                 <li>Improve accuracy</li>
                 <li>Slower scrolling</li>
                 <li>Better battery</li>
-                <li>Add click</li> 
+                <li>Click without clicking nya</li> 
                 <li>Breakout?</li>
             </ul>
         </div>
         <div id="clickwheel" onmousemove="doClickWheel()">
-            <div id="clickwheelButton">Nya</div>
+            <div id="clickwheelButton" onclick="createAudioContext(); this.innerText = '';">Nya</div>
         </div>
     </div>
 </body>
@@ -207,21 +208,42 @@ function highlightMenuAtIndexPrevNext(direction){
     var nextIndex = currentIndex + 1
     var prevIndex = currentIndex - 1
 
-    nextIndex = (nextIndex > maxIndex) ? maxIndex : nextIndex
-    prevIndex = (prevIndex < 0) ? 0 : prevIndex
+    nextIndex = (nextIndex > maxIndex) ? "suppress" : nextIndex
+    prevIndex = (prevIndex < 0) ? "suppress" : prevIndex
 
-    if (direction == "next"){
-        highlightMenuAtIndex(nextIndex)
+    if ((direction == "next") && (nextIndex != "suppress")){
+        highlightMenuAtIndex(nextIndex);
+        piezoClick();
     }
-    else if (direction == "prev"){
-        highlightMenuAtIndex(prevIndex)
+    else if ((direction == "prev") && (prevIndex != "suppress")){
+        highlightMenuAtIndex(prevIndex);
+        piezoClick();
     }
-    return (nextIndex, prevIndex)
+}
+
+function piezoClick(){
+    if (context){
+        var osc = context.createOscillator(); // instantiate an oscillator
+        osc.type = 'sawtooth';
+        osc.frequency.value = 3000; // Hz
+        osc.connect(context.destination); // connect it to the destination
+        osc.start(); // start the oscillator
+        osc.stop(context.currentTime + 0.001); // stop
+    }
+}
+
+function createAudioContext(){
+    if (!context){
+        context = new (window.AudioContext || window.webkitAudioContext)();
+    }
 }
 
 // globals
 var clickwheelAngle = 0;
 const debounce_highlightMenuAtIndexPrevNext = debounce(highlightMenuAtIndexPrevNext, 10);
+
+// audio stuff
+var context
 
 // init
 function init(){
