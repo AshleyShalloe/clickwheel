@@ -81,6 +81,14 @@
 <script>
 'use strict'
 
+function debounce(func, timeout = 100){
+    let timer;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => { func.apply(this, args); }, timeout);
+    };
+}
+
 function getOffset(el) {
   const rect = el.getBoundingClientRect();
   return {
@@ -145,12 +153,12 @@ function doClickWheel(){
     if (scrollDirection == "up"){
        clickwheelAngle = (clickwheelAngle - 10) % 360
        document.getElementById("clickwheel").style.transform = `rotate(${clickwheelAngle}deg)`
-       highlightMenuAtIndexPrevNext("prev")
+       debounce_highlightMenuAtIndexPrevNext("prev")
     }
     else if (scrollDirection == "down"){
        clickwheelAngle = (clickwheelAngle + 10) % 360
        document.getElementById("clickwheel").style.transform = `rotate(${clickwheelAngle}deg)`
-       highlightMenuAtIndexPrevNext("next")
+       debounce_highlightMenuAtIndexPrevNext("next")
     }
 
 }
@@ -193,6 +201,7 @@ function highlightMenuAtIndexPrevNext(direction){
 
 // globals
 var clickwheelAngle = 0;
+const debounce_highlightMenuAtIndexPrevNext = debounce(highlightMenuAtIndexPrevNext, 10);
 
 // init
 function init(){
