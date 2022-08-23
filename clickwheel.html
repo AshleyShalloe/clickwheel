@@ -15,12 +15,13 @@
     #clickwheel{
         height: 300px;
         width: 300px;
-        border: 2px solid lightgray;
+        border: 1px solid lightgray;
         border-radius: 100%;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        background: #ebebeb;
     }
     #clickwheelButton{
         border: 1px solid lightgray; 
@@ -31,12 +32,50 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        background: white;
+    }
+    #menuContainer{
+        display: block;
+        width: 300px;
+        border: 1px solid lightgray;
+        margin-bottom: 50px;
+        height: 200px;
+    }
+    #menu{
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+    }
+    #menu li{
+        display: block;
+        width: 100%;
+    }
+    .menu-highlighted{
+        background: cornflowerblue;
+        color: white;
+    }
+    #deviceContainer{
+        border: 1px solid lightgray;
+        border-radius: 30px;
+        padding: 40px;
+        background: white;
     }
 </style>
 </head>
 <body>
-    <div id="clickwheel" onmousemove="doClickWheel()">
-        <div id="clickwheelButton">Nya</div>
+    <div id="deviceContainer">
+        <div id="menuContainer">
+            <ul id="menu">
+                <li>Thing 1</li>
+                <li>Thing 2</li>
+                <li>Thing 3</li>
+                <li>Thing 4</li>
+                <li>Thing 5</li>
+            </ul>
+        </div>
+        <div id="clickwheel" onmousemove="doClickWheel()">
+            <div id="clickwheelButton">Nya</div>
+        </div>
     </div>
 </body>
 <script>
@@ -112,7 +151,26 @@ function doClickWheel(){
 
 }
 
+function highlightMenuAtIndex(index){
+    // indexes from zero
+    for (var i=0; i<document.getElementById("menu").getElementsByTagName("li").length; i++){
+        if ((i==index) && !document.getElementById("menu").getElementsByTagName("li")[i].classList.contains("menu-highlighted")){
+            document.getElementById("menu").getElementsByTagName("li")[i].classList.toggle("menu-highlighted")
+        }
+        else if (document.getElementById("menu").getElementsByTagName("li")[i].classList.contains("menu-highlighted")){
+            document.getElementById("menu").getElementsByTagName("li")[i].classList.toggle("menu-highlighted")
+        }
+    }
+}
+
 // globals
 var clickwheelAngle = 0;
+
+// init
+function init(){
+    highlightMenuAtIndex(0);
+}
+
+init();
 </script>
 </html>
