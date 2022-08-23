@@ -79,6 +79,8 @@
     </div>
 </body>
 <script>
+'use strict'
+
 function getOffset(el) {
   const rect = el.getBoundingClientRect();
   return {
@@ -143,10 +145,12 @@ function doClickWheel(){
     if (scrollDirection == "up"){
        clickwheelAngle = (clickwheelAngle - 10) % 360
        document.getElementById("clickwheel").style.transform = `rotate(${clickwheelAngle}deg)`
+       highlightMenuAtIndexPrevNext("prev")
     }
     else if (scrollDirection == "down"){
        clickwheelAngle = (clickwheelAngle + 10) % 360
        document.getElementById("clickwheel").style.transform = `rotate(${clickwheelAngle}deg)`
+       highlightMenuAtIndexPrevNext("next")
     }
 
 }
@@ -154,13 +158,37 @@ function doClickWheel(){
 function highlightMenuAtIndex(index){
     // indexes from zero
     for (var i=0; i<document.getElementById("menu").getElementsByTagName("li").length; i++){
-        if ((i==index) && !document.getElementById("menu").getElementsByTagName("li")[i].classList.contains("menu-highlighted")){
-            document.getElementById("menu").getElementsByTagName("li")[i].classList.toggle("menu-highlighted")
+        if ((i==index)){
+            document.getElementById("menu").getElementsByTagName("li")[i].classList.add("menu-highlighted")
         }
         else if (document.getElementById("menu").getElementsByTagName("li")[i].classList.contains("menu-highlighted")){
-            document.getElementById("menu").getElementsByTagName("li")[i].classList.toggle("menu-highlighted")
+            document.getElementById("menu").getElementsByTagName("li")[i].classList.remove("menu-highlighted")
         }
     }
+}
+
+function highlightMenuAtIndexPrevNext(direction){
+    var maxIndex = document.getElementById("menu").getElementsByTagName("li").length - 1
+    var currentIndex = 0
+    for (var i=0; i<maxIndex + 1; i++){
+        if (document.getElementById("menu").getElementsByTagName("li")[i].classList.contains("menu-highlighted")){
+            currentIndex = i
+            continue
+        }
+    }
+    var nextIndex = currentIndex + 1
+    var prevIndex = currentIndex - 1
+
+    nextIndex = (nextIndex > maxIndex) ? maxIndex : nextIndex
+    prevIndex = (prevIndex < 0) ? 0 : prevIndex
+
+    if (direction == "next"){
+        highlightMenuAtIndex(nextIndex)
+    }
+    else if (direction == "prev"){
+        highlightMenuAtIndex(prevIndex)
+    }
+    return (nextIndex, prevIndex)
 }
 
 // globals
