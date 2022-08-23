@@ -102,11 +102,11 @@ function doClickWheel(){
 
     // spin the wheel
     if (scrollDirection == "up"){
-       clickwheelAngle -= 10
+       clickwheelAngle = (clickwheelAngle - 10) % 360
        document.getElementById("clickwheel").style.transform = `rotate(${clickwheelAngle}deg)`
     }
     else if (scrollDirection == "down"){
-       clickwheelAngle += 10
+       clickwheelAngle = (clickwheelAngle + 10) % 360
        document.getElementById("clickwheel").style.transform = `rotate(${clickwheelAngle}deg)`
     }
 
