@@ -1,0 +1,118 @@
+<html>
+<head>
+<style>
+    html{
+        font-family: sans-serif;
+    }
+    body{
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+    }
+    #clickwheel{
+        height: 300px;
+        width: 300px;
+        border: 2px solid lightgray;
+        border-radius: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    #clickwheelButton{
+        border: 1px solid lightgray; 
+        border-radius: 100%; 
+        height: 100px; 
+        width: 100px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+</head>
+<body>
+    <div id="clickwheel" onmousemove="doClickWheel()">
+        <div id="clickwheelButton">Nya</div>
+    </div>
+</body>
+<script>
+function getOffset(el) {
+  const rect = el.getBoundingClientRect();
+  return {
+    left: rect.left + window.scrollX,
+    top: rect.top + window.scrollY,
+    right: rect.right + window.scrollX,
+    bottom: rect.bottom + window.scrollY
+  };
+}
+
+function doClickWheel(){
+    // mouse co-ords in viewport
+    var x = event.clientX;     // Get the horizontal coordinate
+    var y = event.clientY;     // Get the vertical coordinate
+    // clickwheel div bounding box co-ords
+    var clickWheelCoords = getOffset(document.getElementById("clickwheel"))
+    // rest of the function
+    var centreOfClickWheelX = clickWheelCoords["left"] + ((clickWheelCoords["right"] - clickWheelCoords["left"]) / 2)
+    var centreOfClickWheelY = clickWheelCoords["top"] + ((clickWheelCoords["bottom"] - clickWheelCoords["top"]) / 2)
+    var xVectorIsPositve = centreOfClickWheelX < x
+    var yVectorIsPositive = centreOfClickWheelY < y
+
+    var quadrant = undefined
+
+    if (xVectorIsPositve && yVectorIsPositive){
+        quadrant = "bottomRight"
+    }
+    if (xVectorIsPositve && !yVectorIsPositive){
+        quadrant = "topRight"
+    }
+    if (!xVectorIsPositve && yVectorIsPositive){
+        quadrant = "bottomLeft"
+    }
+    if (!xVectorIsPositve && !yVectorIsPositive){
+        quadrant = "topLeft"
+    }
+
+    var scrollDirection = undefined
+    var scrollMagnitude = undefined
+    var moveX = event.movementX
+    var moveY = event.movementY
+    var moveXIsPositive = moveX > 0
+    var moveYIsPositive = moveY > 0
+    var moveXIsZero = moveX == 0
+    var moveYIsZero = moveY == 0
+
+    // decide whether we're going up or down
+    if ((quadrant == "topRight") && !moveYIsZero && (moveY >= moveX)){
+        scrollDirection = moveYIsPositive ? "down" : "up"
+    }
+    else if ((quadrant == "topLeft") && !moveYIsZero){
+        scrollDirection = moveYIsPositive ? "up" : "down"
+    }
+    else if ((quadrant == "bottomLeft") && !moveYIsZero){
+        scrollDirection = moveYIsPositive ? "up" : "down"
+    }
+     else if ((quadrant == "bottomRight") && !moveYIsZero){
+        scrollDirection = moveYIsPositive ? "down" : "up"
+    }
+
+    // spin the wheel
+    if (scrollDirection == "up"){
+       clickwheelAngle -= 10
+       document.getElementById("clickwheel").style.transform = `rotate(${clickwheelAngle}deg)`
+    }
+    else if (scrollDirection == "down"){
+       clickwheelAngle += 10
+       document.getElementById("clickwheel").style.transform = `rotate(${clickwheelAngle}deg)`
+    }
+
+}
+
+// globals
+var clickwheelAngle = 0;
+</script>
+</html>
