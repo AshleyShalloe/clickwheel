@@ -1,8 +1,13 @@
 <html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"/>
+<title>Clickwheel</title>
 <style>
     html{
         font-family: sans-serif;
+        height: 100vh;
+        overflow: hidden;
     }
     body{
         margin: 0 auto;
@@ -11,6 +16,7 @@
         align-items: center;
         justify-content: center;
         height: 100vh;
+        overflow: hidden;
     }
     #clickwheel{
         height: 300px;
@@ -94,7 +100,7 @@
                 <li>Breakout?</li>
             </ul>
         </div>
-        <div id="clickwheel" onmousemove="doClickWheel()">
+        <div id="clickwheel" ontouchmove="doClickWheel()" onmousemove="doClickWheel()">
             <div id="clickwheelButton" onclick="createAudioContext(); this.innerText = '';">Nya</div>
         </div>
     </div>
@@ -122,8 +128,9 @@ function getOffset(el) {
 
 function doClickWheel(){
     // mouse co-ords in viewport
-    var x = event.clientX;     // Get the horizontal coordinate
-    var y = event.clientY;     // Get the vertical coordinate
+    var touch = event.type.includes("touch") ? (event.touches[0] || event.changedTouches[0]): undefined;
+    var x = event.type.includes("mouse") ? event.clientX: touch.pageX;     // Get the horizontal coordinate
+    var y = event.type.includes("mouse") ? event.clientY: touch.pageY;     // Get the vertical coordinate
     // clickwheel div bounding box co-ords
     var clickWheelCoords = getOffset(document.getElementById("clickwheel"))
     // rest of the function
