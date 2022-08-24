@@ -30,6 +30,8 @@
         align-items: center;
         justify-content: center;
         background: #ebebeb;
+        grid-column-start: 1;
+        grid-row-start: 1;
     }
     #clickwheelButton{
         border: 1px solid lightgray; 
@@ -96,13 +98,13 @@
     .icon-triangle{
         height: 1em;
         width: 1em;
-        background: black;
+        background: white;
         clip-path: polygon(0% 0%, 0% 0%, 100% 50%, 0% 100%, 0% 100%)
     }
     .icon-vertical-bar{
         height: 1em;
         width: 0.5em;
-        background: black;
+        background: white;
     }
     .flip-icon{
         transform: scale(-1);
@@ -110,8 +112,48 @@
     .narrow{
         transform: scaleX(0.6);
     }
+    #clickwheelButtonLabelContainer{
+        display: grid;
+        grid-column-start: 1;
+        grid-column-end: 3;
+        grid-row-start: 1;
+        grid-row-end: 3;
+        height: 250px;
+        width: 250px;
+        padding: 25px;
+        align-content: space-between;
+        justify-content: space-between;
+        pointer-events: none;
+    }
     #clickwheelButtonMenu{
         font-weight: bold;
+        text-align: center;
+        grid-column-start: 2;
+        grid-row-start: 1;
+        color: white;
+        z-index: 10;
+    }
+    #clickwheelButtonPlayPause{
+        text-align: center;
+        grid-column-start: 2;
+        grid-row-start: 3;
+    }
+    #clickwheelButtonSkipBack{
+        grid-column-start: 1;
+        grid-row-start: 2;
+        text-align: left;
+    }
+    #clickwheelButtonSkipForward{
+        grid-column-start: 3;
+        grid-row-start: 2;
+        text-align: right;
+    }
+    #clickwheelContainer{
+        display: grid;
+        grid-column-start: 1;
+        grid-column-end: 1;
+        grid-row-start: 1;
+        grid-row-end: 1;
     }
 </style>
 </head>
@@ -131,22 +173,24 @@
                 <li>Breakout?</li>
             </ul>
         </div>
-        <div id="clickwheel" ontouchmove="doClickWheel()" onmousemove="doClickWheel()">
-            <div id="clickwheelButton" onclick="createAudioContext(); this.innerText = '';">Nya</div>
-        </div>
-        <div id="clickwheelButtonLabelContainer" style="display: none">
-            <div id="clickwheelButtonMenu">
-                MENU
+        <div id="clickwheelContainer">
+            <div id="clickwheel" ontouchmove="doClickWheel()" onmousemove="doClickWheel()">
+                <div id="clickwheelButton" onclick="createAudioContext(); this.innerText = '';">Nya</div>
             </div>
-            <div id="clickwheelButtonSkipBack" class="narrow">
-                <div class="icon-vertical-bar"></div><div class="icon-triangle flip-icon"></div><div class="icon-triangle flip-icon"></div>
-            </div>
-            <div id="clickwheelButtonSkipForward" class="narrow">
-                <div class="icon-triangle"></div><div class="icon-triangle"></div><div class="icon-vertical-bar"></div>
-            </div>
-            <div id="clickwheelButtonPlayPause">
-                <div class="icon-triangle"></div>
-                <div class="icon-vertical-bar narrow"></div><div class="icon-vertical-bar narrow"></div>
+            <div id="clickwheelButtonLabelContainer">
+                <div id="clickwheelButtonMenu">
+                    MENU
+                </div>
+                <div id="clickwheelButtonSkipBack" class="narrow">
+                    <div class="icon-vertical-bar"></div><div class="icon-triangle flip-icon"></div><div class="icon-triangle flip-icon"></div>
+                </div>
+                <div id="clickwheelButtonSkipForward" class="narrow">
+                    <div class="icon-triangle"></div><div class="icon-triangle"></div><div class="icon-vertical-bar"></div>
+                </div>
+                <div id="clickwheelButtonPlayPause">
+                    <div class="icon-triangle"></div>
+                    <div class="icon-vertical-bar narrow"></div><div class="icon-vertical-bar narrow"></div>
+                </div>
             </div>
         </div>
     </div>
