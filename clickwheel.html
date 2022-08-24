@@ -19,7 +19,6 @@
         justify-content: center;
         height: 100vh;
         overflow: hidden;
-        position: fixed;
     }
     #clickwheel{
         height: 300px;
@@ -82,6 +81,11 @@
         grid-column-start: 1;
         grid-column-end: 3;
         grid-row-start: 1;
+    }
+    @media only screen and (max-width: 450px){
+        body{
+            position: fixed;
+        }
     }
 </style>
 </head>
