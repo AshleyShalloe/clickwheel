@@ -146,56 +146,46 @@ function doClickWheel(){
     var xVectorIsPositve = centreOfClickWheelX < x
     var yVectorIsPositive = centreOfClickWheelY < y
 
-    var quadrant = undefined
-
-    if (xVectorIsPositve && yVectorIsPositive){
-        quadrant = "bottomRight"
-    }
-    if (xVectorIsPositve && !yVectorIsPositive){
-        quadrant = "topRight"
-    }
-    if (!xVectorIsPositve && yVectorIsPositive){
-        quadrant = "bottomLeft"
-    }
-    if (!xVectorIsPositve && !yVectorIsPositive){
-        quadrant = "topLeft"
-    }
-
+    var sector = undefined // actually just the angle relative to the centre
     var scrollDirection = undefined
-    var scrollMagnitude = undefined
-    var moveX = event.movementX
-    var moveY = event.movementY
-    var moveXIsPositive = moveX > 0
-    var moveYIsPositive = moveY > 0
-    var moveXIsZero = moveX == 0
-    var moveYIsZero = moveY == 0
 
-    // decide whether we're going up or down
-    if ((quadrant == "topRight") && !moveYIsZero && (moveY >= moveX)){
-        scrollDirection = moveYIsPositive ? "down" : "up"
+    // determine what sector we are in
+    // compare to the last sector we were in to decide if we have
+    // moved clockwise or widdershins
+    // wheel is split into top half and bottom half
+    // sector == 0-180 degrees 3 o'clock to 9 o'clock, then 0-180 degrees 9 o'clock to 3 o'clock
+    var opposite = y - centreOfClickWheelY
+    var adjacent = x - centreOfClickWheelX
+    sector = Math.atan(opposite / adjacent) * 180 / Math.PI
+    sector = Math.floor(sector)
+    if (sector < 0){
+        sector = 180 + sector
     }
-    else if ((quadrant == "topLeft") && !moveYIsZero){
-        scrollDirection = moveYIsPositive ? "up" : "down"
+
+    // this won't work when going from the last sector to the first sector
+    // but we'll fix that later maybe
+    if (sector > lastSector){
+        scrollDirection = "clockwise"
     }
-    else if ((quadrant == "bottomLeft") && !moveYIsZero){
-        scrollDirection = moveYIsPositive ? "up" : "down"
+    else if (sector < lastSector){
+        scrollDirection = "anticlockwise"
     }
-     else if ((quadrant == "bottomRight") && !moveYIsZero){
-        scrollDirection = moveYIsPositive ? "down" : "up"
-    }
+
+    // console.log(sector, scrollDirection)
 
     // spin the wheel
-    if (scrollDirection == "up"){
+    if (scrollDirection == "anticlockwise"){
        clickwheelAngle = (clickwheelAngle - 10) % 360
        document.getElementById("clickwheel").style.transform = `rotate(${clickwheelAngle}deg)`
        debounce_highlightMenuAtIndexPrevNext("prev")
     }
-    else if (scrollDirection == "down"){
+    else if (scrollDirection == "clockwise"){
        clickwheelAngle = (clickwheelAngle + 10) % 360
        document.getElementById("clickwheel").style.transform = `rotate(${clickwheelAngle}deg)`
        debounce_highlightMenuAtIndexPrevNext("next")
     }
-
+    // update global
+    lastSector = sector
 }
 
 function highlightMenuAtIndex(index){
@@ -254,6 +244,7 @@ function createAudioContext(){
 
 // globals
 var clickwheelAngle = 0;
+var lastSector
 const debounce_highlightMenuAtIndexPrevNext = debounce(highlightMenuAtIndexPrevNext, 10);
 
 // audio stuff
