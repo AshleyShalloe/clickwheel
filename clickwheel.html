@@ -85,6 +85,7 @@
     @media only screen and (max-width: 450px){
         body{
             position: fixed;
+            background: black;
         }
     }
 </style>
@@ -100,8 +101,7 @@
             <ul id="menu">
                 <li>Add actual features</li>
                 <li>Implement submenus</li>
-                <li>Improve accuracy</li>
-                <li>Slower scrolling</li>
+                <li>Fix the glitch at 3 and 9 o'clock</li>
                 <li>Better battery</li>
                 <li>Click without clicking nya</li> 
                 <li>Breakout?</li>
@@ -115,7 +115,7 @@
 <script>
 'use strict'
 
-function debounce(func, timeout = 100){
+function debounce(func, timeout=100){
     let timer;
     return (...args) => {
         clearTimeout(timer);
@@ -146,32 +146,33 @@ function doClickWheel(){
     var xVectorIsPositve = centreOfClickWheelX < x
     var yVectorIsPositive = centreOfClickWheelY < y
 
-    var sector = undefined // actually just the angle relative to the centre
+    var currentAngle = undefined // the angle relative to the centre
     var scrollDirection = undefined
 
-    // determine what sector we are in
-    // compare to the last sector we were in to decide if we have
-    // moved clockwise or widdershins
+    // determine angle of touch point / cursor relative to centre of clickwheel
+    // compare to the last angle to decide if we have moved clockwise or widdershins
     // wheel is split into top half and bottom half
-    // sector == 0-180 degrees 3 o'clock to 9 o'clock, then 0-180 degrees 9 o'clock to 3 o'clock
+    // currentAngle == 0-180 degrees 3 o'clock to 9 o'clock, then 0-180 degrees 9 o'clock to 3 o'clock
     var opposite = y - centreOfClickWheelY
     var adjacent = x - centreOfClickWheelX
-    sector = Math.atan(opposite / adjacent) * 180 / Math.PI
-    sector = Math.floor(sector)
-    if (sector < 0){
-        sector = 180 + sector
+    currentAngle = Math.atan(opposite / adjacent) * 180 / Math.PI
+    currentAngle = Math.floor(currentAngle)
+    if (currentAngle < 0){
+        currentAngle = 180 + currentAngle
     }
 
-    // this won't work when going from the last sector to the first sector
+    // this won't work when going from the last currentAngle to the first currentAngle
     // but we'll fix that later maybe
-    if (sector > lastSector){
-        scrollDirection = "clockwise"
-    }
-    else if (sector < lastSector){
-        scrollDirection = "anticlockwise"
+    if (Math.abs(lastAngle - currentAngle) >= 10){
+        if (currentAngle > lastAngle){
+            scrollDirection = "clockwise"
+        }
+        else if (currentAngle < lastAngle){
+            scrollDirection = "anticlockwise"
+        }
     }
 
-    // console.log(sector, scrollDirection)
+    // console.log(currentAngle, scrollDirection)
 
     // spin the wheel
     if (scrollDirection == "anticlockwise"){
@@ -184,8 +185,12 @@ function doClickWheel(){
        document.getElementById("clickwheel").style.transform = `rotate(${clickwheelAngle}deg)`
        debounce_highlightMenuAtIndexPrevNext("next")
     }
+    // init global
+    lastAngle = lastAngle ? lastAngle : currentAngle
     // update global
-    lastSector = sector
+    if (Math.abs(lastAngle - currentAngle) >= 10){
+        lastAngle = currentAngle
+    }
 }
 
 function highlightMenuAtIndex(index){
@@ -244,7 +249,7 @@ function createAudioContext(){
 
 // globals
 var clickwheelAngle = 0;
-var lastSector
+var lastAngle
 const debounce_highlightMenuAtIndexPrevNext = debounce(highlightMenuAtIndexPrevNext, 10);
 
 // audio stuff
