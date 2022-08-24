@@ -101,7 +101,6 @@
             <ul id="menu">
                 <li>Add actual features</li>
                 <li>Implement submenus</li>
-                <li>Fix the glitch at 3 and 9 o'clock</li>
                 <li>Better battery</li>
                 <li>Click without clicking nya</li> 
                 <li>Breakout?</li>
@@ -175,15 +174,17 @@ function doClickWheel(){
     // console.log(currentAngle, scrollDirection)
 
     // spin the wheel
-    if (scrollDirection == "anticlockwise"){
-       clickwheelAngle = (clickwheelAngle - 10) % 360
-       document.getElementById("clickwheel").style.transform = `rotate(${clickwheelAngle}deg)`
-       debounce_highlightMenuAtIndexPrevNext("prev")
-    }
-    else if (scrollDirection == "clockwise"){
-       clickwheelAngle = (clickwheelAngle + 10) % 360
-       document.getElementById("clickwheel").style.transform = `rotate(${clickwheelAngle}deg)`
-       debounce_highlightMenuAtIndexPrevNext("next")
+    if (Math.abs(lastAngle - currentAngle) < 90){ // suppress if we pass between semicircles, avoids a glitch at 3 and 9 o'clock
+        if (scrollDirection == "anticlockwise"){
+            clickwheelAngle = (clickwheelAngle - 10) % 360
+            document.getElementById("clickwheel").style.transform = `rotate(${clickwheelAngle}deg)`
+            debounce_highlightMenuAtIndexPrevNext("prev")
+        }
+        else if (scrollDirection == "clockwise"){
+            clickwheelAngle = (clickwheelAngle + 10) % 360
+            document.getElementById("clickwheel").style.transform = `rotate(${clickwheelAngle}deg)`
+            debounce_highlightMenuAtIndexPrevNext("next")
+        }
     }
     // init global
     lastAngle = lastAngle ? lastAngle : currentAngle
