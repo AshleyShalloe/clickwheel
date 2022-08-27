@@ -156,6 +156,42 @@
         grid-row-start: 1;
         grid-row-end: 1;
     }
+    .brick{
+        width: calc(80% / 6);
+        height: 80%;
+        display: inline-block;
+        margin: 0;
+    }
+    .brick.active{
+        background: cornflowerblue;
+    }
+    .ball{
+        width: 2vw;
+        height: 2vw;
+        background: grey;
+        border: 1px solid black;
+        border-radius: 100%;
+        position: absolute;
+    }
+    #brickContainer{
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+    #playfieldContainer{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 8em;
+    }
+    #paddle{
+        background: forestgreen;
+        border-radius: 1em;
+        width: calc(80% / 4);
+        height: calc(80% / 5 / 4);
+        bottom: calc(80% / 5 / 4);
+        position: fixed;
+    }
 </style>
 </head>
 <body>
@@ -165,6 +201,10 @@
                 <div id="statusBar-icon-left" style="grid-column-start: 1; grid-column-end: 1; text-align: left; margin-left: 6px">🔇</div>
                 <div style="grid-column-start: 2; grid-column-end: 2; text-align: center;">Todo</div>
                 <div style="grid-column-start: 3; grid-column-end: 3; text-align: right; margin-right: 6px">🔋</div>
+            </div>
+            <div id="playfieldContainer" style="display: none;">
+                <div id="brickContainer"></div>
+                <div id="paddle" style="left: 50%;"></div>
             </div>
             <ul id="menu">
                 <li>Add actual features</li>
@@ -263,11 +303,13 @@ function doClickWheel(){
         if (scrollDirection == "anticlockwise"){
             clickwheelAngle = (clickwheelAngle - 10) % 360
             document.getElementById("clickwheel").style.transform = `rotate(${clickwheelAngle}deg)`
+            movePaddle("left")
             debounce_highlightMenuAtIndexPrevNext("prev")
         }
         else if (scrollDirection == "clockwise"){
             clickwheelAngle = (clickwheelAngle + 10) % 360
             document.getElementById("clickwheel").style.transform = `rotate(${clickwheelAngle}deg)`
+            movePaddle("right")
             debounce_highlightMenuAtIndexPrevNext("next")
         }
     }
@@ -347,5 +389,234 @@ function init(){
 }
 
 init();
+</script>
+<script>
+
+var brickArray = [
+    [1,1,1,1,1,1],
+    [1,1,1,1,1,1],
+    [1,1,1,1,1,1]
+]
+
+// var paddlePosition = 0.5
+// var paddleWidth = 0.15
+
+function initPlayfield(){
+    var rowHtml = []
+    for (var i=0; i<brickArray.length; i++){
+        var brickHtml = []
+        for (var j=0; j<brickArray[i].length; j++){
+            brickHtml.push("<div class='brick active'></div>")
+        }
+        rowHtml.push(brickHtml.join("\n"))
+    }
+    rowHtml = rowHtml.join("</div>\n<div class='brickRow'>")
+    rowHtml = "<div class='brickRow'>" + rowHtml + "</div>"
+    document.getElementById("brickContainer").innerHTML = rowHtml
+}
+
+function updateBricks(){
+    `Update the bricks on the playfield to match the state of brickArray`
+    for (var i=0; i<brickArray.length; i++){
+        for (var j=0; j<brickArray[i].length; j++){
+            if (brickArray[i][j] == 0){
+                if (document.getElementsByClassName("brickRow")[i].getElementsByClassName("brick")[j].classList.contains("active")){
+                    document.getElementsByClassName("brickRow")[i].getElementsByClassName("brick")[j].classList.remove("active")
+                }
+            }
+            else if (brickArray[i][j] == 1){
+                if (!document.getElementsByClassName("brickRow")[i].getElementsByClassName("brick")[j].classList.contains("active")){
+                    document.getElementsByClassName("brickRow")[i].getElementsByClassName("brick")[j].classList.add("active")
+                }
+            }
+        }
+    }
+}
+
+function initBall(){
+    if (document.getElementsByClassName("ball").length == 0){
+        var ballHtml = "<div class='ball' style='left: 50%; bottom: 10%;'></div>"
+        document.getElementById("playfieldContainer").innerHTML += ballHtml
+    }
+    
+    isLose = false;
+
+    return setInterval(() => {
+        moveBall(document.getElementsByClassName("ball")[0])
+    }, 10);
+}
+
+function moveBall(ballElement){
+    // move the ball in the direction ballAngleDeg
+    var ballLeft = parseFloat(ballElement.style.left.replace("%", ""))
+    var ballBottom = parseFloat(ballElement.style.bottom.replace("%", ""))
+    if (ballLeft >= 100){
+        moveDistanceX = -ballSpeed
+        // ballAngleDeg = ballAngleDeg * -1
+    }
+    if (ballBottom >= 100){
+        moveDistanceY = -ballSpeed
+        // ballAngleDeg = ballAngleDeg * -1
+    }
+    if (ballLeft <= 0){
+        moveDistanceX = ballSpeed
+        // ballAngleDeg = ballAngleDeg * -1
+    }
+    if (ballBottom <= 0){
+        moveDistanceY = ballSpeed
+        if (checkLoseCondition(ballElement)){
+            clearInterval(ballInterval);
+        }
+        // ballAngleDeg = ballAngleDeg * -1
+    }
+    var xComponent = Math.cos(ballAngleDeg * Math.PI / 180) * moveDistanceX
+    var yComponent = Math.sin(ballAngleDeg * Math.PI / 180) * moveDistanceY
+    
+    ballElement.style.left = (ballLeft + xComponent).toString() + "%"
+    ballElement.style.bottom = (ballBottom + yComponent).toString() + "%"
+    // check for collisions 
+    // if collision, in horizontal or vertical plane
+    // calculate angle of incidence
+    // mirror it across the normal of the plane
+    // set ballAngleDeg
+    // repeat on interval
+    // oh, if it was the bottom horizontal, you lose
+    // if we hit the paddle, we can get different angles
+}
+
+function checkBrickCollisions(ballElement){
+    var ballOffsets = ballElement.getBoundingClientRect();
+    var ballTop = ballOffsets.top;
+    var ballLeft = ballOffsets.left;
+    var ballRight = ballOffsets.right;
+    var ballBottom = ballOffsets.bottom;
+    var ballX = ballOffsets.x;
+    var ballY = ballOffsets.y;
+    
+    for (var i=0; i<document.getElementsByClassName("brick").length; i++){
+        if (document.getElementsByClassName("brick")[i].classList.contains("active")){
+            var brickOffsets = document.getElementsByClassName("brick")[i].getBoundingClientRect();
+            var top = brickOffsets.top;
+            var left = brickOffsets.left;
+            var right = brickOffsets.right;
+            var bottom = brickOffsets.bottom;
+
+            if ((ballRight >= left) && (ballLeft <= right) && (ballBottom >= top) && (ballTop <= bottom)){
+                document.getElementsByClassName("brick")[i].classList.remove("active")
+
+                // figure out which side is closest to the ball
+                // then assume that is the side we hit first
+                // and rebound off it
+                var topDelta = Math.abs(ballBottom - top)
+                var leftDelta = Math.abs(ballRight - left)
+                var rightDelta = Math.abs(ballLeft - right)
+                var bottomDelta = Math.abs(ballTop - bottom)
+
+                var minDelta = Math.min(topDelta, leftDelta, rightDelta, bottomDelta)
+
+                if (topDelta == minDelta){
+                    changeDirectionIfCollide("bottom")
+                }
+                else if (leftDelta == minDelta){
+                    changeDirectionIfCollide("right")
+                }
+                else if (rightDelta == minDelta){
+                    changeDirectionIfCollide("left")
+                }
+                else if (bottomDelta == minDelta){
+                    changeDirectionIfCollide("top")
+                }
+            }
+        }
+    }
+}
+
+function changeDirectionIfCollide(plane){
+    if (plane == "top"){
+        moveDistanceY = -ballSpeed
+    }
+    else if (plane == "bottom"){
+        moveDistanceY = ballSpeed
+    }
+    else if (plane == "left"){
+        moveDistanceX = ballSpeed
+    }
+    else if (plane == "right"){
+        moveDistanceX = -ballSpeed
+    }
+}
+
+function initCheckBallCollisions(){
+    return setInterval(function(){debounce(checkBrickCollisions(document.getElementsByClassName("ball")[0]), 15)}, 1)
+}
+
+function movePaddle(direction){
+    var paddlePosition = parseFloat(document.getElementById("paddle").style.left.replace("%", ""))
+    if ((direction == "left") && (paddlePosition > 10)){
+        paddlePosition -= 3
+    }
+    else if ((direction == "right") && (paddlePosition < 90)){
+        paddlePosition += 3
+    }
+    else if (direction == "home"){
+        // return to centre
+        paddlePosition = 50
+    }
+    document.getElementById("paddle").style.left = paddlePosition.toString() + "%"
+}
+
+function initPaddleKeyboardEvents(){
+    window.onkeydown = function(){
+        if (event.key == "ArrowLeft"){
+            movePaddle("left")
+        }
+
+        else if (event.key == "ArrowRight"){
+            movePaddle("right")
+        }
+
+        if (isLose){
+            if (event.key == " ")
+                ballInterval = initBall()
+        }
+    }
+}
+
+function checkLoseCondition(ballElement){
+    var ballOffsets = ballElement.getBoundingClientRect();
+    var ballLeft = ballOffsets.left;
+    var ballRight = ballOffsets.right;
+    var ballBottom = ballOffsets.bottom;
+
+    var paddleOffsets = document.getElementById("paddle").getBoundingClientRect();
+    var paddleLeft = paddleOffsets.left;
+    var paddleRight = paddleOffsets.right;
+    var paddleTop = paddleOffsets.top;
+
+    if (ballBottom > paddleTop){
+        if ((ballLeft <= paddleLeft) || (ballRight >= paddleRight)){
+            isLose = true
+            return true
+        }
+    }
+    return false
+}
+
+function breakoutInit(){
+    document.getElementById("playfieldContainer").style.display = "flex";
+    document.getElementById("menu").style.display = "none";
+    initPlayfield();
+    ballInterval = initBall();
+    initCheckBallCollisions();
+    initPaddleKeyboardEvents();
+}
+
+// globals
+var ballAngleDeg = 45
+var ballSpeed = 0.5
+var moveDistanceX = ballSpeed // distance for ball to move in percent
+var moveDistanceY = ballSpeed
+var ballInterval
+var isLose = false
 </script>
 </html>
